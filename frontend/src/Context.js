@@ -5,20 +5,21 @@ export const myContext = createContext();
 
 const Context = (props) => {
     const [userObject,setUserObject]=useState();
+    const headers = {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "http://localhost:3000",
+            "Access-Control-Allow-Credentials": true
+    }
+
     useEffect(()=>{
         const getUser = async () => {
-            fetch("http://localhost:5000/getUser", {
-              method: "GET",
-              credentials: "include",
-              headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json",
-                "Access-Control-Allow-Credentials": true,
-              },
+            axios.get('http://localhost:5000/getUser', {
+              headers: headers
             })
               .then((response) => {
+                console.log(response);
                 if (response.status === 200) return response.json();
-                throw new Error("authentication hej been feled");
+                throw new Error("Authentication has been failed");
               })
               .then((resObject) => {
                 setUserObject(resObject.user);

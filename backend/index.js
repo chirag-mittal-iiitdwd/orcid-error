@@ -10,15 +10,18 @@ mongoose.connect('mongodb+srv://chirag:mongodb@cluster0.lcaon.mongodb.net/myFirs
     console.log('Connected to MongoDb Database');
 });
 
-var corsOptions = {
-    origin: "*",
-    credentials: true,            //access-control-allow-credentials:true
+app.use(express.json());
+const corsOptions = {
+    origin: 'http://localhost:3000',
+    credentials: true, //access-control-allow-credentials:true
     optionSuccessStatus: 200
 }
-
-app.use(express.json());
-app.options('*', cors());
-app.use(session({ secret: 'secretCode', resave: true, saveUninitialized: true, }));
+app.use(cors(corsOptions));
+app.use(session({
+    secret: 'secretCode',
+    resave: true,
+    saveUninitialized: true,
+}));
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -31,17 +34,20 @@ passport.deserializeUser((user, done) => {
 })
 
 passport.use(new OrcidStrategy({
-    sandbox: true, // use the sandbox for non-production environments
-    clientID: 'APP-X8ECLOVRR82U8ZLN',
-    clientSecret: '546acddf-3515-4940-8d76-4a7f78b35d9f',
-    callbackURL: "/auth/orcid/callback"
-},
+        sandbox: true, // use the sandbox for non-production environments
+        clientID: 'APP-X8ECLOVRR82U8ZLN',
+        clientSecret: '546acddf-3515-4940-8d76-4a7f78b35d9f',
+        callbackURL: "/auth/orcid/callback"
+    },
     function (accessToken, refreshToken, params, profile, done) {
         // NOTE: `profile` is empty, use `params` instead
-        profile = { orcid: params.orcid, name: params.name };
+        console.log(params);
+        profile = {
+            orcid: params.orcid,
+            name: params.name
+        };
 
         // console.log(params);
-        console.log(profile);
         done(null, profile);
     }
 ));
@@ -53,7 +59,9 @@ app.get('/auth/orcid',
 
 // depending on succes or error give a callback
 app.get('/auth/orcid/callback',
-    passport.authenticate('orcid', { failureRedirect: '/login' }),
+    passport.authenticate('orcid', {
+        failureRedirect: '/login'
+    }),
     function (req, res) {
         // Successful authentication, redirect home.
         res.redirect('http://localhost:3000');
@@ -64,6 +72,7 @@ app.get('/', (req, res) => {
 })
 
 app.get('/getUser', (req, res) => {
+    console.log(req.user);
     res.send(req.user);
 })
 
